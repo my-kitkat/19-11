@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>chaos.exe</title>
+<style>
+  :root{ --bg:#0d0d16; --ink:#fff; color-scheme: dark; }
+  *{box-sizing:border-box;}
+  html,body{height:100%; margin:0; overflow:hidden; background:var(--bg);}
+  body{
+    font-family: "Comic Sans MS", "Segoe UI", system-ui, sans-serif;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  #field{ position:fixed; inset:0; overflow:hidden; }
+
+  .t{
+    position:absolute; white-space:nowrap; font-weight:900;
+    color:#fff; text-shadow:0 0 10px currentColor, 0 0 24px currentColor;
+    user-select:none; pointer-events:none;
+  }
+
+  @keyframes fly   { from{ transform: translateX(-30vw) translateY(var(--y,0)) rotate(0deg);} to{ transform: translateX(130vw) translateY(var(--y,0)) rotate(360deg);} }
+  @keyframes fall  { from{ transform: translateY(-20vh) rotate(0deg);} to{ transform: translateY(120vh) rotate(540deg);} }
+  @keyframes spin  { from{ transform: rotate(0deg) scale(var(--s,1));} to{ transform: rotate(360deg) scale(var(--s,1));} }
+  @keyframes dance { 0%,100%{ transform: translateY(0) rotate(-8deg);} 50%{ transform: translateY(-40px) rotate(8deg);} }
+  @keyframes lie   { from{ opacity:0; transform: rotate(90deg) scale(.5);} to{ opacity:1; transform: rotate(90deg) scale(1);} }
+
+  .fly   { animation: fly linear infinite; }
+  .fall  { animation: fall linear infinite; }
+  .spin  { animation: spin linear infinite; }
+  .dance { animation: dance ease-in-out infinite; }
+  .lie   { animation: lie .6s ease forwards; }
+
+  #startOverlay{
+    position:fixed; inset:0; background:#0d0d16; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:18px; z-index:10; text-align:center; padding:20px;
+  }
+  #startOverlay h1{ color:#ff4d6d; font-size:2rem; margin:0; }
+  #startBtn{
+    font-size:1.2rem; padding:14px 30px; border-radius:999px; border:none;
+    background:#ff4d6d; color:#fff; font-weight:800; cursor:pointer;
+  }
+
+  #bigTitle{
+    position:fixed; top:8%; left:0; right:0; text-align:center; z-index:5;
+    font-size:clamp(1.6rem, 7vw, 3.2rem); color:#ffd23f;
+    text-shadow:0 0 16px #ff4d6d, 0 0 30px #ff4d6d; pointer-events:none;
+    animation: dance 0.5s ease-in-out infinite, flicker 0.25s linear infinite;
+  }
+  @keyframes flicker{ 0%,100%{ color:#ffd23f;} 25%{ color:#4de3ff;} 50%{ color:#ff4d6d;} 75%{ color:#7cff4d;} }
+  @keyframes shake{ 0%,100%{ transform: translate(0,0);} 25%{ transform: translate(6px,-4px);} 50%{ transform: translate(-6px,4px);} 75%{ transform: translate(4px,6px);} }
+  body.shaking{ animation: shake 0.25s linear infinite; }
+</style>
+</head>
+<body>
+
+<div id="startOverlay">
+  <h1>🔊 tap to unleash the chaos 🔊</h1>
+  <button id="startBtn">START</button>
+</div>
+
+<div id="bigTitle">DEEPANSHU BKL</div>
+<div id="field"></div>
+
+<script>
+const PHRASE = "DEEPANSHU BKL";
+const colors = ["#ff4d6d","#ffd23f","#4de3ff","#7cff4d","#ff914d","#c04dff"];
+const field = document.getElementById('field');
+const W = () => window.innerWidth, H = () => window.innerHeight;
+
+function rand(a,b){ return a + Math.random()*(b-a); }
+
+function spawn(n, kind){
+  for(let i=0;i<n;i++){
+    const el = document.createElement('div');
+    el.className = 't ' + kind;
+    el.textContent = PHRASE;
+    el.style.left = rand(0, W()*0.6) + 'px';
+    el.style.top = rand(0, H()) + 'px';
+    el.style.fontSize = rand(0.9, 2.4).toFixed(2) + 'rem';
+    el.style.color = colors[Math.floor(Math.random()*colors.length)];
+    const dur = rand(3, 9).toFixed(2) + 's';
+    el.style.animationDuration = dur;
+    el.style.animationDelay = (-rand(0,9)).toFixed(2) + 's';
+    if(kind === 'fly'){ el.style.setProperty('--y', rand(0,H()) + 'px'); el.style.top = '0px'; }
+    if(kind === 'spin'){ el.style.setProperty('--s', rand(0.6,1.6).toFixed(2)); }
+    if(kind === 'lie'){ el.style.top = rand(H()*0.6, H()*0.92) + 'px'; }
+    field.appendChild(el);
+  }
+}
+
+function go(){
+  spawn(18, 'fly');
+  spawn(16, 'fall');
+  spawn(16, 'spin');
+  spawn(12, 'dance');
+  spawn(10, 'lie');
+  document.body.classList.add('shaking');
+  setInterval(() => spawn(4, ['fly','fall','spin','dance'][Math.floor(Math.random()*4)]), 1200);
+}
+
+function speakTroll(){
+  if(!('speechSynthesis' in window)) return;
+  const say = () => {
+    const u = new SpeechSynthesisUtterance('Deepanshu behnka lota');
+    u.rate = 1.05;
+    u.pitch = 1.6;
+    speechSynthesis.speak(u);
+  };
+  say();
+  setInterval(say, 3200);
+}
+
+// --- synthesized original "troll tune" via Web Audio API (no copyrighted audio) ---
+function startTrollTune(){
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const master = ctx.createGain();
+  master.gain.value = 0.18;
+  master.connect(ctx.destination);
+
+  const notes = [392,440,392,523, 440,392,330,392, 523,587,523,440, 392,330,294,330];
+  let i = 0;
+  const step = 0.22;
+
+  function playNote(freq, time){
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(freq, time);
+    g.gain.setValueAtTime(0.0001, time);
+    g.gain.linearRampToValueAtTime(0.9, time + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + step*0.9);
+    osc.connect(g); g.connect(master);
+    osc.start(time); osc.stop(time + step);
+  }
+
+  function schedule(){
+    const now = ctx.currentTime + 0.05;
+    for(let k=0;k<4;k++){
+      playNote(notes[(i+k) % notes.length], now + k*step);
+    }
+    i = (i+4) % notes.length;
+  }
+  schedule();
+  setInterval(schedule, step*4*1000);
+}
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  document.getElementById('startOverlay').style.display = 'none';
+  go();
+  startTrollTune();
+  speakTroll();
+});
+</script>
+</body>
+</html>
